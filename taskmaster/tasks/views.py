@@ -5,12 +5,15 @@ from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
 User = get_user_model()
 
 class RegisterView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -22,6 +25,8 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LoginView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -36,6 +41,8 @@ class LoginView(APIView):
         return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
     
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             logout(request)
