@@ -1,42 +1,40 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth import get_user_model
+from datetime import datetime
+
 # Create your models here.
+User = get_user_model()
 
-class CustomUserManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
-        if not email:
-            raise ValueError("Users must have an email address")
-        if not username:
-            raise ValueError("Users must have a username")
+class Task(models.Model):
+    PRIORITY_CHOICES = [
+        ('Low', 'Low'),
+        ('Medium', 'Medium'),
+        ('High', 'High'),
+    ]
 
-        email = self.normalize_email(email)
-        user = self.model(username=username, email=email)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+    ]
 
-    def create_superuser(self, username, email, password=None):
-        user = self.create_user(username, email, password)
-        user.is_admin = True
-        user.save(using=self._db)
-        return user
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks') # linking task to the user
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    due_date = models.DateField(blank=True, null=True)
+    priority_level = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='Medium') # task priority
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending') # task status
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)  # Timestamp when marked as complete
 
-class User(AbstractBaseUser):
-    username = models.CharField(max_length=50, unique=True)
-    email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
-
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    def save(self, *args, **kwargs):
+        # Set completed_at when status changes to "Completed"
+        if self.status == 'Completed' and not self.completed_at:
+            self.completed_at = datetime.now()
+        # Reset completed_at if status is reverted to "Pending"
+        elif self.status == 'Pending' and self.completed_at:
+            self.completed_at = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.username
-
-    def has_perm(self, perm, obj=None):
-        return self.is_admin
-
-    def has_module_perms(self, app_label):
-        return self.is_admin
+        return self.title # string representation of a task

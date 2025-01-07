@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r8(wo*r_y)c+6i_@*5y20jot94@&q559v@cx3vd6g(y^cx$u)f'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['taskmaster.com', 'www.taskmaster.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -37,9 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users.apps.UsersConfig',
     'tasks.apps.TasksConfig',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
+    'task_history.apps.TaskHistoryConfig',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +82,12 @@ WSGI_APPLICATION = 'taskmaster.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'taskmaster'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '0647509789ItM*'),
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
@@ -119,13 +127,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'tasks.User'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -134,4 +143,58 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Enabling browser XSS protection
+SECURE_BROWSER_XSS_FILTER = True
+
+# Clickjacking protection
+X_FRAME_OPTIONS = 'DENY'
+
+# Prevent browsers from guessing the content type
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+SECURE_SSL_REDIRECT = True
+
+# Enforce CSRF cookies over HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Enforce session cookies over HTTPS
+SESSION_COOKIE_SECURE = True
+
+SECURE_SSL_REDIRECT = True
+
+# Instruct browsers to enforce HTTPS for 1 year (31536000 seconds)
+SECURE_HSTS_SECONDS = 31536000
+
+# Apply HSTS policy to all subdomains
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Allow your site to be included in browsers' HSTS preload list
+SECURE_HSTS_PRELOAD = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1', 'https://taskmaster.com', 'https://www.taskmaster.com']
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs/error.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
 }

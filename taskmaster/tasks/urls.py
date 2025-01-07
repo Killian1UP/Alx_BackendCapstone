@@ -1,12 +1,13 @@
 from django.urls import path
-from .views import RegisterView, LoginView, LogoutView
-from rest_framework.authtoken.views import obtain_auth_token
+from . import views
 
 urlpatterns = [
-    # User Mangagement endpoints
-    path('users/register/', RegisterView.as_view(), name='register_user'),
-    path('users/login/', LoginView.as_view(), name='login_user'),
-    path('users/logout/', LogoutView.as_view(), name='logout_user'),
-     # Endpoint to obtain authentication token
-    path('users/token/', obtain_auth_token, name='obtain_auth_token'),
+    # CRUD operation endpoints for Task Management
+    path('', views.TaskListView.as_view(), name='task_list'),
+    path('<int:pk>/', views.TaskDetailView.as_view(), name='task_detail'),
+    path('new/', views.TaskCreateView.as_view(), name='task_create'),
+    path('<int:pk>/update/', views.TaskUpdateView.as_view(), name='task_update'),
+    path('<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task_delete'),
+    # Status endpoint
+    path('<int:pk>/status/', views.TaskStatusUpdateView.as_view(), name='task_status'),
 ]
