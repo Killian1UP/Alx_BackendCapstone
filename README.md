@@ -24,3 +24,33 @@ Response Example:
 {
     "token": "a9f84a74e5f889b13a2392c123456789abcdef1234"
 }
+
+Project Idea: Taskmaster - A Task Management API
+
+Overview - 
+
+Taskmaster is a task management API built with Django and Django Rest Framework (DRF). The application allows users to create, update, and manage tasks efficiently. Additionally, it includes user authentication, registration, and token-based authentication for secure access. Taskmaster is designed to provide a seamless experience for managing personal and work-related tasks.
+
+Key Features -
+
+User Authentication & Registration: Users can register, log in, and authenticate via token-based authentication.
+
+Task Management: Users can create, update, delete, and retrieve tasks, ensuring effective task tracking.
+
+User Roles: Each user has personalized access to their tasks, ensuring data privacy and security.
+
+Logging: The application includes error logging for debugging and system monitoring purposes.
+
+Technologies that will be used - 
+
+Python 3.x: Programming language for the backend.
+
+Django: Web framework for building the API.
+
+Django Rest Framework (DRF): Used for building the API endpoints and handling user authentication.
+
+MySQL: Relational database used for storing user data and tasks.
+
+JWT Token Authentication: For secure, token-based user authentication.
+
+Git: Version control for managing code changes.
